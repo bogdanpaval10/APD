@@ -1,0 +1,17 @@
+	Inainte de a implementa partea pentru bonus, erau doar doua functii (f_maps si f_reducers).
+Pentru a face ceva generic, m-am gandit sa le mai fac la fiecare cate o functie.
+
+	La map se gaseste cate un nume de fisier din care sa se citeasca si apoi se apeleaza o functie
+(in cazul meu map_helper) care contine implementarea operatiilor ce trebuie facute cu datele din fisier.
+Astfel, aceasta functie poate fi implementata in orice mod si se apeleze din f_maps (adica f_maps nu 
+depinde de implementarea functiei de helper).
+
+	Asemanator si pentru reducer, se formeaza fisierul in care urmeaza sa se scrie si se apeleaza 
+functia reducer_helper, unde poate fi implementata orice combinare a rezultatelor din map, astfel 
+incat f_reducers nu depinde de implementarea acelei functii.
+
+	Daca trebuie folosita aceasta implementare pentru a rezolva alte operatii, trebuie schimbate 
+doar unele campuri din structurile de map si reduce si cele doua functii de helper, care sa realizeze 
+operatiile cerute. Nu sunt sigur daca am inteles bine la ce va referiti prin aceasta genericitate, 
+dar eu asa m-am gandit ca ar putea fi rezolvata. Daca nu m-as fi gandit la bonus, erau doar cele 
+doua functii si in locul apelurilor de functii era implementarea propriu-zisa.

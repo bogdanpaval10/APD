@@ -1,0 +1,50 @@
+main
+	- se extrag din argv argumentele primite in linia de comanda, adica nr de maperi, de reduceri si
+	numele fisierului ce contine calea catre fisierele urmatoare;
+	- se citeste fiecare nume din fisier si se salvezeaza in vectorul in_files, apoi se sorteza
+	crescator dupa dimensiune, astfel:
+		- functia cmp primeste doua fisiere, la ambele pozitioneaza cursorul (fseek) la final,
+		afla dimensiunea (ftell) si le compara;
+	- se initializeaza mutex-ul si bariera (asteapta M + R) ce urmeaza sa fie folosite;
+	- se pornesc in aceeasi iteratie cele 2 tipuri de thread-uri, se completeaza si impacheteaza 
+    campurile specifice lor si se trimit in ultimul parametru din apelul functiei pthread_create;
+	- se da join in aceeasi iteratie thread-urilor map si reduce;
+	- daca crearea sau join-urile nu s-au putut executa, se printeaza o eroare;
+
+f_maps
+	- cat timp mai sunt fisiere neprocesate, se marcheaza intrarea in zona critica folosind lock(mutex),
+	se scoate din vector ultimul nume si apoi se marcheaza iesirea din zona critica unlock(mutex);
+    am folosit acest lucru pentru a nu avea situatia in care 2 thread-uri incearca sa acceseze 
+    acelasi nume si sa provoace un race condition;
+	- se deschide fisierul respetiv si se apeleaza functia map_helper;
+	- se asteapta la bariera pentru ca toate thread-urile map sa ajunga in acel loc;
+map_helper
+	- se citesc toate numerele din fisier, unde sunt 2 cazuri:
+		- nr este 1 si atunci de adauga in toate listele partiale ale acelui thread map (adica M[thread_id]);
+		- nr este mai mare decat 1, se apeleaza functia test_power, se sorteaza crescator pentru 
+        a putea sterge duplicatele;
+	- se parcurg puterile gasite si daca aceasta este mai mica decat R + 1 (= exponentul maxim),
+	adauga numarul in lista partiala powers[i] - 2 (listele sunt de la 0, nu de la 2) ale thread-ului curent;
+
+test_power
+	- functia are la baza logica de aici, dar adaptata de mine pt implementarea mea:
+	https://www.reddit.com/r/algorithms/comments/al8y5h/whats_the_most_efficient_way_to_see_if_a_number/; 
+	- primeste un numar si, folosind cautare binara, cauta exponentii (pornind de la exponentul 2)
+	pe care ii are acel numar si ii adauga in vectorul powers;
+	- este recursiva, iar atunci cand se gaseste un exponent, se verifica daca baza este si ea la 
+    randul ei un nr putere perfecta, iar in acest caz se reapeleaza functia (si tot asa pana cand 
+    baza nu va mai fi o putere perfecta);
+	- la final vectorul powers va avea toate puterile perfecte ale acelui numar;
+
+f_reducers
+	- se asteapta la bariera pentru ca toate thread-urile reduce sa ajunga in acel loc, astfel incat sa fie
+	respectata conditia ca toate thread-urile map sa se fi terminat inainte sa inceapa cele de reduce;
+	- se formeaza numele fisierului de iesire si se deschide;
+	- se apeleaza functia reducer_helper pentru a combina listele partiale;
+reducer_helper
+	- se parcurg toti map-erii, iar de la fiecare map se adauga in vectorul combine toate numerele 
+    din lista partiala asociata exponentului thread_id;
+	- se sorteaza crescator pentru a putea sterge duplicatele si se afiseaza in fisier dimensiunea vectorului.
+
+    P.S. In map si reducer nu am folosit alte variabile in care sa pun elementele din structura 
+(adica sa fac o "despachetare"), care ar fi facut citirea mai usoara, pentru a nu consuma timp din executie.

@@ -1,0 +1,28 @@
+Main:
+	- se salveaza numele folder-ului in care sunt fisierele de intrare si nr de thread-uri;
+	- se formeaza fisierul de intrare pt comenzi cu BufferedReader si fiserele de iesire cu BufferedWriter;
+	- se foloseste o variabila atomica pt a contoriza nr de task-uri din pool si a se putea opri executor-ul;
+	- se adauga primul task de level 1;
+	- daca executorul level 1 a fost oprit (variabila atomica este -1), se opreste si executorul level 2.
+
+Level 1:
+	- se bazeaza pe exemplul dat in laborator, cu ierarhia de fisiere si directoare;
+	- se citeste urmatoarea linie din fisierul de comenzi, iar daca nu s-a terminat fisierul, se separa
+	numele comenzii si nr de produse din comanda;
+	- se incrementeaza variabila atomica din main si se adauga inca un task level 1 in pool (un fel de 
+	recursivitate, cand se citeste o linie se adauga un task in pool);
+	- se initializeaza a doua variabila atomica cu nr de produse din comanda (va fi folosita la level 2);
+	- se creeaza un task level 2 pt fiecare produs din comanda;
+	- dupa ce s-au executat instructiunile anterioare, daca lini citita este null, se opreste executorul 
+	de level 1 si se seteaza variabila atomica din main cu -1.
+
+Level 2:
+	- se foloseste o variabila atomica pt a numara cate produse din comanda au fost gasite;
+	- se citeste din fisier pana cand nu au fost gasite toate produsele cautate, astfel:
+		- se citeste urmatoarea linie din fisierul de produse, iar daca nu s-a terminat fisierul, 
+		se separa numele comenzii si numele produsului;
+		- daca produsul citit din fisier este din comanda cautata, se incrementeaza nr de produse gasite, 
+		iar daca produsul gasit este acelasi cu produsul cautat, se afiseaza in fisierul de produse ca 
+		produsul respectiv a fost trimis si se scade nr de produse ce mai trebuie gasite;
+	- daca au fost gasite toate produsele din comanda, comanda a fost rezolvata si se afiseaza in fisierul 
+	de comenzi ca aceasta comanda a fost trimisa.
